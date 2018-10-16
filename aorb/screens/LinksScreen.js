@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View, Text, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
+import { ScrollView, ActivityIndicator, ListView, StyleSheet, View, Text, TouchableHighlight, TouchableOpacity, Alert } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 
 export default class LinksScreen extends React.Component {
@@ -15,13 +15,53 @@ export default class LinksScreen extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      isLoading: true,
+    }
+  }
+
+  //fetch('')
+  componentDidMount() {
+    return fetch('https://facebook.github.io/react-native/movies.json')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+        this.setState({
+          isLoading: false,
+          dataSource: ds.cloneWithRows(responseJson.movies),
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   handleBoxPress = () => {
     Alert.alert("You pressed a box!")
   }
+/*
+  ListViewItemSeparator = () => {
+    return (
+      <View
+        style={{
+   
+          height: .5,
+          width: "100%",
+          backgroundColor: "#000",
+   
+        }}
+      />
+    );
+  }*/
 
   render() {
+    if (this.state.isLoading) {
+      return (
+        <View style={{flex: 1, paddingTop: 20}}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
     return (
       <View style={styles.container}>
         <View style={[styles.boxContainer, styles.boxOne]}>
@@ -29,7 +69,7 @@ export default class LinksScreen extends React.Component {
             <ScrollView
               horizontal = { true }
               showsHorizontalScrollIndicator = { false }
-              endFillColor = { '#000'} >
+              endFillColor = { '#010'} >
               <TouchableHighlight style={styles.horizonBox} onPress = {this.handleBoxPress} >
 
                 <Text>Box</Text>
@@ -45,9 +85,15 @@ export default class LinksScreen extends React.Component {
               </TouchableOpacity>
             </ScrollView>
           </View>
-        </View>
-        <View style={[styles.boxContainer, styles.boxTwo]}>
-          <Text>Big Box</Text>
+        </View> 
+        <View style={styles.boxContainer}>
+          <ListView
+            style={styles.listView}
+            dataSource = {this.state.dataSource}
+            renderRow = {
+              (rowData) => <Text>Title: {rowData.title}, Release: {rowData.releaseYear}</Text>
+            }
+          />
         </View>
       </View>
       
@@ -67,9 +113,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 10,
     borderRadius: 5,
+   
   },
   horizonContainer:{
     flexDirection: 'row',
+    padding: 5
   },
   horizonBox:{
     backgroundColor:'#738ea0',
@@ -79,7 +127,7 @@ const styles = StyleSheet.create({
     elevation:5,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 10,
+    margin: 5,
   },
   boxOne: {
     backgroundColor: '#bfced8',
@@ -90,4 +138,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#809eb2',
     flex:4,
   },
+
+  listView: {
+    padding: 12,
+  }
 });
