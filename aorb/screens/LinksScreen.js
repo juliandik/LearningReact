@@ -22,13 +22,13 @@ export default class LinksScreen extends React.Component {
 
   //fetch('')
   componentDidMount() {
-    return fetch('https://facebook.github.io/react-native/movies.json')
+    return fetch('https://api.unsplash.com/photos')
       .then((response) => response.json())
       .then((responseJson) => {
         let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
         this.setState({
           isLoading: false,
-          dataSource: ds.cloneWithRows(responseJson.movies),
+          dataSource: ds.cloneWithRows(responseJson),
         });
       })
       .catch((error) => {
@@ -91,7 +91,7 @@ export default class LinksScreen extends React.Component {
             style={styles.listView}
             dataSource = {this.state.dataSource}
             renderRow = {
-              (rowData) => <Text>Title: {rowData.title}, Release: {rowData.releaseYear}</Text>
+              (rowData) => <Text>Title: {rowData.width}, Release: {rowData.height}</Text>
             }
           />
         </View>
